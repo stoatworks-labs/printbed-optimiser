@@ -1,0 +1,27 @@
+# Cloudflare deployment for Printbed Optimiser: a static-assets-only Worker serving dist/.
+# Cloudflare only hands out files. The slicing, layout and export all run in the visitor's
+# browser, so there is no server code here and there must never be any.
+#
+# Deploy from a checkout of main:
+#
+#   npm run build && cf-run npx --yes wrangler@4.116.0 deploy
+#
+# The page needs COOP/COEP to start the slicer. public/_headers sets them and is copied into
+# dist/, and Workers static assets apply it. If the live page reports that the slicer cannot
+# start, check those headers first.
+#
+# A ROUTE, not a custom domain. stoatworks-labs.com is at Cloudflare's limit of 100 Workers
+# custom domains per zone (error 100122), so `custom_domain = true` would upload a Worker that
+# nothing serves. A route has no such limit but needs a proxied DNS record to exist first,
+# which wrangler does not create: `printbed-optimiser` is an AAAA 100:: record, proxied, made
+# through the API on 2026-11-07. Delete that record and this page goes dark with a green deploy.
+
+name = "printbed-optimiser"
+compatibility_date = "2026-11-07"
+
+[assets]
+directory = "./dist"
+
+[[routes]]
+pattern = "printbed-optimiser.stoatworks-labs.com/*"
+zone_name = "stoatworks-labs.com"

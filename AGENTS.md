@@ -75,10 +75,14 @@ scripts/check-bundle.mjs    fails the build if engine code is in dist/assets (th
   fetches it).
 - `three` is in the main chunk (about 890 kB minified). Code-split BedView if load time starts to matter.
 - Timings vary a lot with machine load: the same 27-plate sweep has taken 20 s and 90 s in one session.
+- Cloudflare injects an inline bot-detection script into the live page. The CSP (`script-src 'self'`) blocks it,
+  so DevTools shows one CSP violation on load. That is expected: the script is Cloudflare's, not ours, and the
+  page needs nothing from it. Do not loosen the CSP to silence it.
 
 ## 5. Status
 
 MVP. Verified end to end in Chrome on 2026-11-07: X1 Carbon cubes (64 per plate full, 28 recommended), a mixed
 kit, quantity mode (100 → 50 + 50), and the 3MF and G-code exports. The H2D two-nozzle bed is covered by an
-engine test. Not yet done: opening the exported 3MF in Bambu Studio, a real print, other vendors' printers
-beyond the profile pickers loading, and hosting.
+engine test. Hosted at <https://printbed-optimiser.stoatworks-labs.com> since 2026-11-07 (deployed by hand, see
+CLAUDE.md), where a cube sweep ran in Chrome with the page cross-origin isolated. Not yet done: opening the
+exported 3MF in Bambu Studio, a real print, and other vendors' printers beyond the profile pickers loading.

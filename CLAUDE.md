@@ -23,5 +23,16 @@ the new host guards its `SharedArrayBuffer` check, the isolation headers can be 
 
 ## Deploy
 
-Not hosted yet. `dist/` is static. The host must send COOP/COEP (see `public/_headers`). Check the repo's
-visibility before adding any GitHub workflow: private repos get none.
+Live at <https://printbed-optimiser.stoatworks-labs.com>: a static-assets-only Cloudflare Worker
+(`wrangler.toml`) serving `dist/`, which applies `public/_headers` (COOP/COEP/CSP). Deploy by hand from a
+checkout of `main`, never a branch:
+
+```
+npm run build && cf-run npx --yes wrangler@4.116.0 deploy
+```
+
+There is no deploy workflow yet, so a push to `main` changes nothing at the edge until someone runs that. Check
+what is live with `cf-run npx wrangler deployments list`.
+
+The hostname is a zone **route**, not a custom domain (the zone is at Cloudflare's 100 custom-domain limit). It
+depends on the proxied `AAAA 100::` DNS record `printbed-optimiser` existing; wrangler does not create it.

@@ -12,6 +12,9 @@ prefers plates the slicer passes without a warning, and fewer parts per plate wh
 **Nothing leaves your device.** There is no server and no account. The page, the slicer and the printer profiles
 are static files, and your models are read in the tab and never uploaded.
 
+**Use it at <https://printbed-optimiser.stoatworks-labs.com>**, in a current desktop browser (tested in Chrome).
+The first visit downloads up to 13 MB of slicer and profiles, which the browser then caches.
+
 ## What it does
 
 1. **Reads the models.** STL (binary or ASCII) and 3MF, including Bambu Studio and OrcaSlicer project files
@@ -75,7 +78,8 @@ Cross-Origin-Embedder-Policy: require-corp
 ```
 
 `public/_headers` sets them, with a strict CSP, for Cloudflare and Netlify-style hosts. `npm run dev` and
-`npm run preview` set them too. Without them the page says the slicer cannot start.
+`npm run preview` set them too. Without them the page says the slicer cannot start. The public copy is a
+Cloudflare static-assets Worker (`wrangler.toml`) that only serves these files.
 
 ## Licences
 

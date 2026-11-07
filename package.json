@@ -1,0 +1,37 @@
+{
+  "name": "printbed-optimiser",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lay out multi-object 3D prints on the bed and find how many to print at once, with OrcaSlicer's own engine running in the browser. Nothing is uploaded.",
+  "license": "MIT",
+  "scripts": {
+    "fetch-engine": "node scripts/fetch-engine.mjs",
+    "predev": "node scripts/fetch-engine.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/fetch-engine.mjs",
+    "build": "tsc -b && vite build && node scripts/check-bundle.mjs",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "pretest:engine": "node scripts/fetch-engine.mjs",
+    "test:engine": "vitest run --config vitest.engine.config.ts"
+  },
+  "dependencies": {
+    "@muon3d/slicer-engine-protocol": "https://github.com/Muon-3D/muon3d-slicer-engine/releases/download/v0.6.1/muon3d-slicer-engine-protocol-2.4.0.tgz",
+    "fflate": "^0.8.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}

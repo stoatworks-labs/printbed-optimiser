@@ -117,6 +117,7 @@ export function App() {
   const key = JSON.stringify({
     parts: models.map((m) => [m.part.id, m.part.quantity, m.flat]),
     sel: profiles.selection,
+    plate: profiles.plates?.choice.value,
     gap: goal.gap,
     edge: goal.edgeMargin,
     rot: goal.allowRotation,
@@ -319,7 +320,7 @@ export function App() {
           <section className="card">
             <h2>
               Answer
-              {stale && <span className="aside">Models, printer or spacing changed since this run: run again to update.</span>}
+              {stale && <span className="aside">Models, printer, plate or spacing changed since this run: run again to update.</span>}
             </h2>
             {!plates.length && run.status !== 'running' && (
               <p className="muted" style={{ margin: 0 }}>
@@ -443,7 +444,7 @@ export function App() {
                     {exporting ?? 'Download G-code'}
                   </button>
                   <span className="hint" style={{ margin: 0, alignSelf: 'center' }}>
-                    The 3MF opens in Bambu Studio or OrcaSlicer with every part in place; set the printer and filament there.
+                    The 3MF opens in Bambu Studio or OrcaSlicer with every part in place; set the printer, plate and filament there.
                   </span>
                 </div>
               </>

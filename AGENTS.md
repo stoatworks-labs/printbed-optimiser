@@ -22,7 +22,7 @@ src/
   lib/layout/pack.ts        THE PACKER: grid, centre, rows, columns; maxKits, layoutFor
   lib/layout/service.ts     layout requests in this thread or a worker (workers/layout.worker.ts)
   lib/bed.ts                BedSpec from a flattened machine preset; the static grid
-  lib/profiles/             OrcaSlicer presets: library, compatibility conditions
+  lib/profiles/             OrcaSlicer presets: library, compatibility conditions; plates.ts (build plate types)
   lib/engine/pool.ts        EnginePool: N single-threaded engine hosts, protocol v2 only
   lib/plan/optimise.ts      probe -> fullest plate -> sweep, all sliced
   lib/plan/sweep.ts         sampleCounts, recommend, timeline, planQuantity (pure, tested)
@@ -69,6 +69,11 @@ scripts/check-bundle.mjs    fails the build if engine code is in dist/assets (th
   `crossOriginIsolated` stays false). Verify in real Chrome, Firefox or Safari.
 - A running slice cannot be stopped. Stop clears the queue, and the UI says "Stopping when the slices running now
   finish…".
+- **Every job names a build plate** (`curr_bed_type`, put in the process config). Without it OrcaSlicer slices on a
+  Smooth Cool Plate, and ABS, ASA, PA, PC and most filled filaments refuse that plate (code -61, "Plate 1: Cool Plate
+  does not support filament 1"). A filament supports a plate when both its bed temperatures for it are above 0.
+  OrcaSlicer offers the choice only on Bambu Lab printers and those with `support_multi_bed_types`; every other
+  printer is fixed to the Smooth High Temp Plate (`src/lib/profiles/plates.ts`).
 - Vitest 5 hides `console.log` from passing tests. Use `process.stderr.write` in a debug test.
 - Never run `vitest --root /` (it scans the disk). Run it from the repo.
 - The engine tests (`npm run test:engine`) take about a minute and need `public/slicer/` (the pretest hook

@@ -1,9 +1,13 @@
 // Printer, process and filament: OrcaSlicer's own system presets, offered the way OrcaSlicer offers them.
 import type { Profiles } from '../lib/app/useProfiles.ts';
+import { plateTemp, plateType } from '../lib/profiles/plates.ts';
 import type { BedSpec } from '../types.ts';
 
 export function PrinterPanel({ profiles, bed, busy }: { profiles: Profiles; bed: BedSpec | null; busy: boolean }) {
-  const { lib, selection, choices } = profiles;
+  const { lib, selection, choices, plates, configs } = profiles;
+  const label = (v: string) => plateType(v)?.label ?? v;
+  const filament = selection.filament ?? 'This filament';
+  const bedTemp = plates && configs ? plateTemp(configs.filaments[0], plates.choice.value) : 0;
   const vendors = lib?.vendors() ?? [];
   const printers = lib ? lib.printers(selection.vendor) : [];
   const disabled = busy || !lib;
@@ -55,6 +59,34 @@ export function PrinterPanel({ profiles, bed, busy }: { profiles: Profiles; bed:
           ))}
         </select>
       </label>
+      <label className="field">
+        <span>Build plate</span>
+        <select
+          value={plates?.choice.value ?? ''}
+          disabled={disabled || !plates || !plates.selectable}
+          onChange={(e) => profiles.setPlate(e.target.value)}
+        >
+          {(plates?.options ?? []).map((p) => (
+            <option key={p.value} value={p.value} disabled={!p.ok}>
+              {p.label}
+              {p.ok ? '' : ' (not for this filament)'}
+            </option>
+          ))}
+        </select>
+      </label>
+      {plates && (
+        <p className="hint" style={{ margin: 0 }}>
+          {plates.choice.replaced
+            ? `${filament} can't print on the ${label(plates.choice.replaced)}, so this uses the ${label(plates.choice.value)}. `
+            : ''}
+          {plates.choice.unsupported
+            ? `${filament} has no bed temperature for the ${label(plates.choice.value)}, so OrcaSlicer will refuse to slice it. Pick another filament. `
+            : bedTemp > 0
+              ? `Plate at ${bedTemp} °C. `
+              : ''}
+          {!plates.selectable && 'OrcaSlicer uses one plate type for this printer.'}
+        </p>
+      )}
       {bed && (
         <p className="hint" style={{ margin: 0 }}>
           Bed {Math.round(bed.max[0] - bed.min[0])} × {Math.round(bed.max[1] - bed.min[1])} mm, up to {bed.maxHeight} mm tall

@@ -14,6 +14,7 @@ import { optimise } from './optimise.ts';
 import { recommend, planQuantity, formatDuration } from './sweep.ts';
 import { analysePart } from '../mesh/analyse.ts';
 import { box, lShape } from '../test-meshes.ts';
+import { choosePlate, printerPlates } from '../profiles/plates.ts';
 import type { Part } from '../../types.ts';
 
 const base = pathToFileURL(path.resolve('public/slicer') + path.sep);
@@ -81,6 +82,24 @@ describe('optimise against OrcaSlicer', () => {
     const plan = planQuantity(result.plates, 100, { overheadSeconds: 300 })!;
     log(`100 cubes: ${plan.plates.map((p) => p.kits).join(' + ')} in ${formatDuration(plan.totalSeconds)}`);
     expect(plan.plates.reduce((s, p) => s + p.kits, 0)).toBe(100);
+  });
+
+  it('slices ABS-GF only once the job names a plate it supports', async () => {
+    const s = await setup('BBL', 'Bambu Lab X1 Carbon 0.4 nozzle');
+    pools.push(s.pool);
+    const name = s.choices.filaments.find((f) => f.startsWith('Bambu ABS-GF'))!;
+    const filament = await s.lib.flatten('filament', 'BBL', name);
+    const cube = () => box(20, 20, 20).map((v, i) => (i % 3 === 2 ? v : v + 118)); // centre of the 256 mm bed
+    const job = (process: typeof s.process) => ({ configs: { machine: s.choices.machine, process, filaments: [filament] }, objects: [{ name: 'Cube', positions: cube() }] });
+    // No curr_bed_type: OrcaSlicer slices on a Smooth Cool Plate, which ABS-GF does not support.
+    const bare = await s.pool.slice(job(s.process));
+    expect(bare.ok).toBe(false);
+    if (!bare.ok) expect(bare.message).toMatch(/does not support filament/);
+    const plate = choosePlate('Cool Plate', printerPlates(s.choices.machine, 'BBL'), filament);
+    log(`${name}: Cool Plate -> ${plate.value}`);
+    expect(plate).toEqual({ value: 'Textured PEI Plate', replaced: 'Cool Plate', unsupported: false });
+    const fixed = await s.pool.slice({ ...job({ ...s.process, curr_bed_type: plate.value }), keepGcode: true });
+    expect(fixed.ok).toBe(true);
   });
 
   it('keeps a kit of mixed parts inside both nozzles\' reach on an H2D', async () => {

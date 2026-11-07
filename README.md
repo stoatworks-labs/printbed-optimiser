@@ -4,7 +4,8 @@
 > (Anthropic), directed and reviewed by a human author. Tested in Chrome against OrcaSlicer's
 > Bambu Lab X1 Carbon and H2D presets; no plate from it has been printed yet.
 
-Drop STL or 3MF models, pick a printer, process and filament, and the page works out how many to print at once.
+Drop STL or 3MF models, pick a printer, process, filament and build plate, and the page works out how many to print
+at once.
 OrcaSlicer's own engine, compiled to WebAssembly, runs in the browser tab. It slices the plate at every count
 from one kit up to a full bed, and the page recommends the count with the shortest print time per piece. It
 prefers plates the slicer passes without a warning, and fewer parts per plate when that costs little time.
@@ -49,7 +50,7 @@ Every time shown comes from a slice. The layout rules only decide where the part
 - One filament per plate. Multi-colour and per-object settings are not modelled.
 - A plate is limited to about 4 million triangles, which is what a browser tab's slicer heap holds. Counts past
   that are not sliced, and the page says so.
-- The 3MF carries geometry and positions only. Pick the printer and presets again in your slicer.
+- The 3MF carries geometry and positions only. Pick the printer, presets and plate again in your slicer.
 - Only OrcaSlicer's engine for now. The engine is reached through a message protocol, so another slicer
   compiled the same way could be added.
 

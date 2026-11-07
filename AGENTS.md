@@ -83,6 +83,7 @@ scripts/check-bundle.mjs    fails the build if engine code is in dist/assets (th
 
 MVP. Verified end to end in Chrome on 2026-11-07: X1 Carbon cubes (64 per plate full, 28 recommended), a mixed
 kit, quantity mode (100 → 50 + 50), and the 3MF and G-code exports. The H2D two-nozzle bed is covered by an
-engine test. Hosted at <https://printbed-optimiser.stoatworks-labs.com> since 2026-11-07 (deployed by hand, see
-CLAUDE.md), where a cube sweep ran in Chrome with the page cross-origin isolated. Not yet done: opening the
+engine test. Hosted at <https://printbed-optimiser.stoatworks-labs.com> since 2026-11-07, where a cube sweep
+ran in Chrome with the page cross-origin isolated. Every push to `main` deploys it (`deploy.yml`, see
+CLAUDE.md). Not yet done: opening the
 exported 3MF in Bambu Studio, a real print, and other vendors' printers beyond the profile pickers loading.

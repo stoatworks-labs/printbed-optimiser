@@ -2,7 +2,8 @@
 # Cloudflare only hands out files. The slicing, layout and export all run in the visitor's
 # browser, so there is no server code here and there must never be any.
 #
-# Deploy from a checkout of main:
+# Deployed by .github/workflows/deploy.yml on every push to main. Manual fallback, from a
+# checkout of main and only when that workflow is broken:
 #
 #   npm run build && cf-run npx --yes wrangler@4.116.0 deploy
 #

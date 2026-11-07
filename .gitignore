@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.cache/
+*.tsbuildinfo
+.DS_Store
+.claude/worktrees/
+# Fetched by scripts/fetch-engine.mjs from the pinned Muon3D release; never committed.
+public/slicer/

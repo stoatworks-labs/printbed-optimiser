@@ -1,26 +1,36 @@
+/* Colours come from the shared Stoatworks theme (stoatworks-theme.css, imported first),
+   so the page follows the system's light or dark setting. The 3D plate view stays dark
+   on the stage in both modes. */
 :root {
-  color-scheme: dark;
-  --bg: #0d1b2a;
-  --bg-2: #13263a;
-  --bg-3: #1b3350;
-  --line: #2a466a;
-  --fg: #e6edf3;
-  --fg-2: #a8b7c7;
-  --fg-3: #6f8298;
-  --link: #8cbcf5;
-  --primary: #2f74c8;
-  --primary-hover: #3987e5;
-  /* Chart: one series and the recommended point, validated on --bg-2 (dark). */
+  --bg: var(--sw-paper);
+  --bg-2: var(--sw-card);
+  --bg-3: var(--sw-tint);
+  --line: var(--sw-line);
+  --fg: var(--sw-ink);
+  --fg-2: var(--sw-muted);
+  --fg-3: var(--sw-faint);
+  --link: var(--sw-accent);
+  --primary: var(--sw-accent);
+  /* Status: always beside an icon and a word, never colour alone. */
+  --good: var(--sw-ok);
+  --warning: var(--sw-warn);
+  --critical: var(--sw-bad);
+  --radius: var(--sw-radius);
+  --mono: var(--sw-mono);
+  /* Chart: one series and the recommended point. Light-mode values that hold 3:1 on
+     the card; the dark ones are the originals, validated on the dark card. */
+  --series: #2f74c8;
+  --highlight: #a86f00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --series: #3987e5;
+    --highlight: #c98500;
+  }
+}
+:root[data-theme="dark"] {
   --series: #3987e5;
   --highlight: #c98500;
-  /* Status: always beside an icon and a word, never colour alone. */
-  --good: #0ca30c;
-  --warning: #fab219;
-  --serious: #ec835a;
-  --critical: #d03b3b;
-  --radius: 8px;
-  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --sw-support-accent: var(--link);
 }
 
 * {
@@ -32,7 +42,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 14px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font: 14px/1.45 var(--sw-font);
 }
 
 a {
@@ -49,38 +59,38 @@ select {
 .app {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 20px 20px 60px;
+  padding: 18px 20px 60px;
 }
 
+/* The navy bar (sw-bar) at the full width of the window; .top-inner lines its
+   contents up with the page below. */
 header.top {
+  display: block;
+  padding: 10px 0;
+}
+header.top .top-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-header.top h1 {
-  margin: 0;
-  font-size: 22px;
-  letter-spacing: 0.01em;
-}
-header.top h1 span {
-  color: var(--link);
 }
 header.top .tag {
-  color: var(--fg-2);
+  color: var(--sw-navy-ink-2);
 }
 header.top .pill {
   font-size: 12px;
   font-weight: 500;
-  color: var(--link);
+  color: var(--sw-accent-soft);
   border: 1px solid currentColor;
   border-radius: 999px;
   padding: 1px 9px;
 }
 header.top .ver {
   margin-left: auto;
-  color: var(--fg-3);
+  color: var(--sw-navy-ink-2);
   font-family: var(--mono);
   font-size: 12px;
 }
@@ -112,19 +122,16 @@ header.top .ver {
 }
 .card > h2 {
   margin: 0 0 10px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--fg-2);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
 .card > h2 .aside {
   margin-left: auto;
-  text-transform: none;
-  letter-spacing: 0;
+  font-size: 13px;
   font-weight: 400;
   color: var(--fg-3);
 }
@@ -184,7 +191,7 @@ header.top .ver {
 }
 .model {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   padding: 8px 10px;
   background: var(--bg);
 }
@@ -225,7 +232,7 @@ header.top .ver {
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   overflow: hidden;
 }
 .qty button {
@@ -239,7 +246,9 @@ header.top .ver {
   width: 44px;
   height: 26px;
   border: 0;
-  background: var(--bg);
+  border-radius: 0;
+  padding: 0;
+  background: var(--bg-2);
   text-align: center;
   -moz-appearance: textfield;
 }
@@ -286,9 +295,9 @@ header.top .ver {
 .field input[type='number'],
 .field input[type='text'] {
   width: 100%;
-  background: var(--bg);
+  background: var(--bg-2);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   padding: 6px 8px;
   min-width: 0;
 }
@@ -305,7 +314,7 @@ header.top .ver {
 .seg {
   display: flex;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   overflow: hidden;
   margin-bottom: 10px;
 }
@@ -315,7 +324,7 @@ header.top .ver {
   padding: 6px 8px;
   cursor: pointer;
   color: var(--fg-2);
-  background: var(--bg);
+  background: var(--bg-2);
 }
 .seg label + label {
   border-left: 1px solid var(--line);
@@ -326,8 +335,8 @@ header.top .ver {
   pointer-events: none;
 }
 .seg label:has(input:checked) {
-  background: var(--bg-3);
-  color: var(--fg);
+  background: var(--primary);
+  color: var(--sw-on-accent);
   font-weight: 600;
 }
 .seg label:has(input:focus-visible) {
@@ -347,8 +356,8 @@ details.more > summary {
 
 .btn {
   border: 1px solid var(--line);
-  background: var(--bg-3);
-  border-radius: 6px;
+  background: var(--bg-2);
+  border-radius: var(--sw-radius-sm);
   padding: 7px 14px;
   cursor: pointer;
 }
@@ -362,12 +371,11 @@ details.more > summary {
 .btn.primary {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--sw-on-accent);
   font-weight: 600;
 }
 .btn.primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  filter: brightness(1.08);
 }
 .btn.big {
   width: 100%;
@@ -385,7 +393,7 @@ details.more > summary {
 }
 .progress .bar {
   height: 6px;
-  background: var(--bg);
+  background: var(--bg-3);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -447,7 +455,7 @@ details.more > summary {
   padding: 10px 14px;
   border-radius: var(--radius);
   border: 1px solid var(--critical);
-  background: rgba(208, 59, 59, 0.12);
+  background: color-mix(in srgb, var(--critical) 12%, transparent);
 }
 
 /* ---- Results ----------------------------------------------------------------------------------------------- */
@@ -494,19 +502,23 @@ details.more > summary {
 .bed {
   position: relative;
   height: 420px;
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   overflow: hidden;
-  background: var(--bg);
+  background: var(--sw-stage);
+  color: var(--sw-stage-ink);
   touch-action: none;
 }
 .bed canvas {
   display: block;
 }
+.bed .overlay,
+.bed .empty {
+  color: color-mix(in srgb, var(--sw-stage-ink) 62%, transparent);
+}
 .bed .overlay {
   position: absolute;
   left: 10px;
   bottom: 8px;
-  color: var(--fg-3);
   font-size: 12px;
   pointer-events: none;
 }
@@ -518,9 +530,10 @@ details.more > summary {
   gap: 4px;
 }
 .bed .views button {
-  background: rgba(13, 27, 42, 0.8);
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  background: color-mix(in srgb, var(--sw-stage) 80%, transparent);
+  color: var(--sw-stage-ink);
+  border: 1px solid var(--sw-stage-line);
+  border-radius: 6px;
   padding: 2px 8px;
   font-size: 12px;
   cursor: pointer;
@@ -575,13 +588,13 @@ details.more > summary {
 .tooltip {
   position: absolute;
   pointer-events: none;
-  background: var(--bg-3);
+  background: var(--bg-2);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   padding: 6px 9px;
   font-size: 12px;
   white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(6, 14, 22, 0.22);
   z-index: 2;
 }
 .tooltip b {
@@ -623,7 +636,7 @@ table.plates tbody tr:hover {
   background: var(--bg-3);
 }
 table.plates tr.selected {
-  background: rgba(57, 135, 229, 0.16);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
 }
 .badge {
   display: inline-block;

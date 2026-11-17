@@ -262,218 +262,207 @@ export function App() {
   const rpSeconds = rp ? plateSeconds(rp, overheadSeconds) : null;
 
   return (
-    <div className="app">
-      <header className="top">
-        <h1>
-          Printbed <span>Optimiser</span>
-        </h1>
-        <span className="pill">preview</span>
-        <span className="tag">Lay out the plate and find how many to print at once, with OrcaSlicer's engine in your browser.</span>
-        <span className="ver">{__APP_VERSION__}</span>
+    <>
+      {/* The navy bar runs the full width of the window; its contents line up with the page. */}
+      <header className="top sw-bar">
+        <div className="top-inner">
+          <h1 className="sw-brand">
+            <span className="sw-mark" aria-hidden="true">▤</span> Printbed Optimiser
+          </h1>
+          <span className="pill">preview</span>
+          <span className="tag">Lay out the plate and find how many to print at once, with OrcaSlicer's engine in your browser.</span>
+          <span className="ver">{__APP_VERSION__}</span>
+        </div>
       </header>
 
-      <div className="layout">
-        <div className="col">
-          <ModelPanel
-            models={models}
-            advice={advice}
-            loadErrors={loadErrors}
-            busy={busy || loadingFiles}
-            onFiles={onFiles}
-            onQuantity={(id, q) => setModels((ms) => ms.map((m) => (m.part.id === id ? setQuantity(m, q) : m)))}
-            onFlat={(id, flat) => setModels((ms) => ms.map((m) => (m.part.id === id ? setFlat(m, flat) : m)))}
-            onRemove={(id) => setModels((ms) => ms.filter((m) => m.part.id !== id))}
-          />
-          <PrinterPanel profiles={profiles} bed={bed} busy={busy} />
-          <GoalPanel goal={goal} onChange={setGoal} busy={busy} kitNoun={noun} />
-          <section className="card">
-            {busy ? (
-              <button type="button" className="btn big" onClick={cancel} disabled={stopping}>
-                {stopping ? 'Stopping when the slices running now finish…' : 'Stop'}
-              </button>
-            ) : (
-              <button type="button" className="btn primary big" disabled={!canRun} onClick={start}>
-                {result && !stale ? 'Run again' : 'Find the best plate'}
-              </button>
-            )}
-            {run.status === 'running' && (
-              <div className="progress" aria-live="polite">
-                <div className="bar">
-                  <div style={{ width: `${Math.round((100 * run.done) / Math.max(1, run.total))}%` }} />
-                </div>
-                <div className="label">
-                  <span>{run.message}</span>
-                  <span>
-                    {run.total > 1 && `${run.done} / ${run.total} · `}
-                    {pool.current?.pool.size ?? 1} slicer{(pool.current?.pool.size ?? 1) > 1 ? 's' : ''} at once
-                  </span>
-                </div>
-              </div>
-            )}
-            {!models.length && <p className="hint" style={{ margin: '8px 0 0' }}>Add a model to start.</p>}
-            {engineError && <p className="banner small">{engineError}</p>}
-            {run.status === 'failed' && <p className="banner small">The run stopped: {run.error}</p>}
-          </section>
-        </div>
-
-        <div className="col">
-          <section className="card">
-            <h2>
-              Answer
-              {stale && <span className="aside">Models, printer, plate or spacing changed since this run: run again to update.</span>}
-            </h2>
-            {!plates.length && run.status !== 'running' && (
-              <p className="muted" style={{ margin: 0 }}>
-                {models.length
-                  ? 'Find the best plate slices one kit, then the fullest plate, then the counts in between, and recommends the count with the shortest time per piece.'
-                  : 'Drop a model, pick the printer, and the answer appears here.'}
-              </p>
-            )}
-            {run.status === 'running' && !plates.length && <p className="muted" style={{ margin: 0 }}>{run.message}…</p>}
-            {rp && rpSeconds !== null && (
-              <>
-                <div className="hero">
-                  <div className="big">
-                    {rp.kits} <small>{noun}s per plate</small>
-                  </div>
-                  <div className="stats">
-                    <div className="stat">
-                      <div className="v">{formatDuration(rpSeconds / rp.kits)}</div>
-                      <div className="k">per {noun}</div>
-                    </div>
-                    <div className="stat">
-                      <div className="v">{formatDuration(rpSeconds)}</div>
-                      <div className="k">per plate</div>
-                    </div>
-                    {rp.filamentG !== null && (
-                      <div className="stat">
-                        <div className="v">{rp.filamentG.toFixed(0)} g</div>
-                        <div className="k">filament per plate</div>
-                      </div>
-                    )}
-                    <div className="stat">
-                      <div className="v">{rp.objects}</div>
-                      <div className="k">objects</div>
-                    </div>
-                  </div>
-                </div>
-                <p className="reason">
-                  {busy ? 'So far: ' : ''}
-                  {rec.reason}
-                </p>
-              </>
-            )}
-            {!rp && plates.length > 0 && !busy && <p className="muted">{rec.reason}</p>}
-            {plan && (
-              <div className="plan">
-                <b>
-                  {goal.quantity} {noun}
-                  {goal.quantity === 1 ? '' : 's'}
-                </b>{' '}
-                in {plan.plates.length} plate{plan.plates.length === 1 ? '' : 's'} ({plan.plates.map((p) => p.kits).join(' + ')}): about{' '}
-                <b>{formatDuration(plan.totalSeconds)}</b> one after another
-                {plan.plates.some((p) => p.estimated) && <span className="faint"> · slicing the remaining plate sizes…</span>}
-                <div className="actions" style={{ marginTop: 6 }}>
-                  {[...new Set(plan.plates.map((p) => p.kits))].map((k) => (
-                    <button key={k} type="button" className="btn" onClick={() => setSelected(k)} aria-pressed={shownKits === k}>
-                      Show the {k}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {(probeErrors.length > 0 || (result?.notes.length ?? 0) > 0) && (
-              <ul className="msgs" style={{ marginTop: 10 }}>
-                {probeErrors.map((p) => (
-                  <Message key={p.partId} level="error">
-                    {nameOf(p.partId)} would not slice on its own: {p.error}
-                  </Message>
-                ))}
-                {result!.notes.map((n) => (
-                  <Message key={n} level="info">
-                    {n}
-                  </Message>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="card">
-            <h2>
-              Plate
-              {shown && (
-                <span className="aside">
-                  {shown.kits} {noun}
-                  {shown.kits === 1 ? '' : 's'} · {shown.objects} objects · {shown.layout.strategy === 'grid' ? 'grid' : `${shown.layout.strategy} packing`}
-                  {shown.layout.spacing > 1 ? `, clearances ×${shown.layout.spacing}` : ''}
-                </span>
+      <div className="app">
+        <div className="layout">
+          <div className="col">
+            <ModelPanel
+              models={models}
+              advice={advice}
+              loadErrors={loadErrors}
+              busy={busy || loadingFiles}
+              onFiles={onFiles}
+              onQuantity={(id, q) => setModels((ms) => ms.map((m) => (m.part.id === id ? setQuantity(m, q) : m)))}
+              onFlat={(id, flat) => setModels((ms) => ms.map((m) => (m.part.id === id ? setFlat(m, flat) : m)))}
+              onRemove={(id) => setModels((ms) => ms.filter((m) => m.part.id !== id))}
+            />
+            <PrinterPanel profiles={profiles} bed={bed} busy={busy} />
+            <GoalPanel goal={goal} onChange={setGoal} busy={busy} kitNoun={noun} />
+            <section className="card">
+              {busy ? (
+                <button type="button" className="btn big" onClick={cancel} disabled={stopping}>
+                  {stopping ? 'Stopping when the slices running now finish…' : 'Stop'}
+                </button>
+              ) : (
+                <button type="button" className="btn primary big" disabled={!canRun} onClick={start}>
+                  {result && !stale ? 'Run again' : 'Find the best plate'}
+                </button>
               )}
-            </h2>
-            <BedView bed={run.status === 'done' || run.status === 'running' ? run.req.bed : bed} parts={runParts} layout={shown?.layout ?? null} caption={bed ? 'Drag to turn, scroll to zoom' : undefined} />
-            {shown && (
-              <>
-                {runParts.length > 1 && (
-                  <div className="legend">
-                    {runParts.map((p, i) => (
-                      <span key={p.id}>
-                        <i style={{ background: PART_COLOURS[i % PART_COLOURS.length] }} /> {p.name} ×{p.quantity}
-                      </span>
+              {run.status === 'running' && (
+                <div className="progress" aria-live="polite">
+                  <div className="bar">
+                    <div style={{ width: `${Math.round((100 * run.done) / Math.max(1, run.total))}%` }} />
+                  </div>
+                  <div className="label">
+                    <span>{run.message}</span>
+                    <span>
+                      {run.total > 1 && `${run.done} / ${run.total} · `}
+                      {pool.current?.pool.size ?? 1} slicer{(pool.current?.pool.size ?? 1) > 1 ? 's' : ''} at once
+                    </span>
+                  </div>
+                </div>
+              )}
+              {!models.length && <p className="hint" style={{ margin: '8px 0 0' }}>Add a model to start.</p>}
+              {engineError && <p className="banner small">{engineError}</p>}
+              {run.status === 'failed' && <p className="banner small">The run stopped: {run.error}</p>}
+            </section>
+          </div>
+
+          <div className="col">
+            <section className="card">
+              <h2>
+                Answer
+                {stale && <span className="aside">Models, printer, plate or spacing changed since this run: run again to update.</span>}
+              </h2>
+              {!plates.length && run.status !== 'running' && (
+                <p className="muted" style={{ margin: 0 }}>
+                  {models.length
+                    ? 'Find the best plate slices one kit, then the fullest plate, then the counts in between, and recommends the count with the shortest time per piece.'
+                    : 'Drop a model, pick the printer, and the answer appears here.'}
+                </p>
+              )}
+              {run.status === 'running' && !plates.length && <p className="muted" style={{ margin: 0 }}>{run.message}…</p>}
+              {rp && rpSeconds !== null && (
+                <>
+                  <div className="hero">
+                    <div className="big">
+                      {rp.kits} <small>{noun}s per plate</small>
+                    </div>
+                    <div className="stats">
+                      <div className="stat">
+                        <div className="v">{formatDuration(rpSeconds / rp.kits)}</div>
+                        <div className="k">per {noun}</div>
+                      </div>
+                      <div className="stat">
+                        <div className="v">{formatDuration(rpSeconds)}</div>
+                        <div className="k">per plate</div>
+                      </div>
+                      {rp.filamentG !== null && (
+                        <div className="stat">
+                          <div className="v">{rp.filamentG.toFixed(0)} g</div>
+                          <div className="k">filament per plate</div>
+                        </div>
+                      )}
+                      <div className="stat">
+                        <div className="v">{rp.objects}</div>
+                        <div className="k">objects</div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="reason">
+                    {busy ? 'So far: ' : ''}
+                    {rec.reason}
+                  </p>
+                </>
+              )}
+              {!rp && plates.length > 0 && !busy && <p className="muted">{rec.reason}</p>}
+              {plan && (
+                <div className="plan">
+                  <b>
+                    {goal.quantity} {noun}
+                    {goal.quantity === 1 ? '' : 's'}
+                  </b>{' '}
+                  in {plan.plates.length} plate{plan.plates.length === 1 ? '' : 's'} ({plan.plates.map((p) => p.kits).join(' + ')}): about{' '}
+                  <b>{formatDuration(plan.totalSeconds)}</b> one after another
+                  {plan.plates.some((p) => p.estimated) && <span className="faint"> · slicing the remaining plate sizes…</span>}
+                  <div className="actions" style={{ marginTop: 6 }}>
+                    {[...new Set(plan.plates.map((p) => p.kits))].map((k) => (
+                      <button key={k} type="button" className="btn" onClick={() => setSelected(k)} aria-pressed={shownKits === k}>
+                        Show the {k}
+                      </button>
                     ))}
                   </div>
-                )}
+                </div>
+              )}
+              {(probeErrors.length > 0 || (result?.notes.length ?? 0) > 0) && (
                 <ul className="msgs" style={{ marginTop: 10 }}>
-                  {!shown.ok && <Message level="error">OrcaSlicer refused this plate: {shown.error?.message}</Message>}
-                  {shown.ok && !shown.warnings.length && <Message level="good">OrcaSlicer sliced this plate without a warning.</Message>}
-                  {shown.warnings.map((w, i) => (
-                    <Message key={i} level="warning">
-                      {w.message}
-                      {w.objects?.length ? <span className="faint"> ({w.objects.slice(0, 4).join(', ')}{w.objects.length > 4 ? ', …' : ''})</span> : null}
+                  {probeErrors.map((p) => (
+                    <Message key={p.partId} level="error">
+                      {nameOf(p.partId)} would not slice on its own: {p.error}
                     </Message>
                   ))}
-                  {brims.length > 0 && (
-                    <Message level="info">
-                      Room left for the brim OrcaSlicer gives {brims.map((b) => `${nameOf(b.partId)} (${b.brim} mm)`).join(', ')}.
+                  {result!.notes.map((n) => (
+                    <Message key={n} level="info">
+                      {n}
                     </Message>
-                  )}
+                  ))}
                 </ul>
-                <div className="actions" style={{ marginTop: 10 }}>
-                  <button type="button" className="btn" onClick={export3mf} disabled={!shown.ok}>
-                    Download 3MF
-                  </button>
-                  <button type="button" className="btn" onClick={exportGcode} disabled={!shown.ok || run.status !== 'done' || !!exporting}>
-                    {exporting ?? 'Download G-code'}
-                  </button>
-                  <span className="hint" style={{ margin: 0, alignSelf: 'center' }}>
-                    The 3MF opens in Bambu Studio or OrcaSlicer with every part in place; set the printer, plate and filament there.
-                  </span>
-                </div>
-              </>
-            )}
-          </section>
+              )}
+            </section>
 
-          <section className="card">
-            <h2>
-              Time per {noun}
-              <span className="aside">every point is a plate OrcaSlicer sliced</span>
-            </h2>
-            <SweepChart
-              plates={plates}
-              overheadSeconds={overheadSeconds}
-              recommended={rp?.kits ?? null}
-              fastest={rec.fastest?.kits ?? null}
-              selected={shownKits}
-              noun={noun}
-              onSelect={setSelected}
-            />
-          </section>
-
-          {plates.length > 0 && (
             <section className="card">
-              <h2>Plates sliced</h2>
-              <PlateTable
+              <h2>
+                Plate
+                {shown && (
+                  <span className="aside">
+                    {shown.kits} {noun}
+                    {shown.kits === 1 ? '' : 's'} · {shown.objects} objects · {shown.layout.strategy === 'grid' ? 'grid' : `${shown.layout.strategy} packing`}
+                    {shown.layout.spacing > 1 ? `, clearances ×${shown.layout.spacing}` : ''}
+                  </span>
+                )}
+              </h2>
+              <BedView bed={run.status === 'done' || run.status === 'running' ? run.req.bed : bed} parts={runParts} layout={shown?.layout ?? null} caption={bed ? 'Drag to turn, scroll to zoom' : undefined} />
+              {shown && (
+                <>
+                  {runParts.length > 1 && (
+                    <div className="legend">
+                      {runParts.map((p, i) => (
+                        <span key={p.id}>
+                          <i style={{ background: PART_COLOURS[i % PART_COLOURS.length] }} /> {p.name} ×{p.quantity}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <ul className="msgs" style={{ marginTop: 10 }}>
+                    {!shown.ok && <Message level="error">OrcaSlicer refused this plate: {shown.error?.message}</Message>}
+                    {shown.ok && !shown.warnings.length && <Message level="good">OrcaSlicer sliced this plate without a warning.</Message>}
+                    {shown.warnings.map((w, i) => (
+                      <Message key={i} level="warning">
+                        {w.message}
+                        {w.objects?.length ? <span className="faint"> ({w.objects.slice(0, 4).join(', ')}{w.objects.length > 4 ? ', …' : ''})</span> : null}
+                      </Message>
+                    ))}
+                    {brims.length > 0 && (
+                      <Message level="info">
+                        Room left for the brim OrcaSlicer gives {brims.map((b) => `${nameOf(b.partId)} (${b.brim} mm)`).join(', ')}.
+                      </Message>
+                    )}
+                  </ul>
+                  <div className="actions" style={{ marginTop: 10 }}>
+                    <button type="button" className="btn" onClick={export3mf} disabled={!shown.ok}>
+                      Download 3MF
+                    </button>
+                    <button type="button" className="btn" onClick={exportGcode} disabled={!shown.ok || run.status !== 'done' || !!exporting}>
+                      {exporting ?? 'Download G-code'}
+                    </button>
+                    <span className="hint" style={{ margin: 0, alignSelf: 'center' }}>
+                      The 3MF opens in Bambu Studio or OrcaSlicer with every part in place; set the printer, plate and filament there.
+                    </span>
+                  </div>
+                </>
+              )}
+            </section>
+
+            <section className="card">
+              <h2>
+                Time per {noun}
+                <span className="aside">every point is a plate OrcaSlicer sliced</span>
+              </h2>
+              <SweepChart
                 plates={plates}
                 overheadSeconds={overheadSeconds}
-                maxPlateSeconds={maxPlateSeconds}
                 recommended={rp?.kits ?? null}
                 fastest={rec.fastest?.kits ?? null}
                 selected={shownKits}
@@ -481,12 +470,28 @@ export function App() {
                 onSelect={setSelected}
               />
             </section>
-          )}
-        </div>
-      </div>
 
-      <EngineNotice hello={hello} info={profiles.lib?.info.engine ?? null} />
-    </div>
+            {plates.length > 0 && (
+              <section className="card">
+                <h2>Plates sliced</h2>
+                <PlateTable
+                  plates={plates}
+                  overheadSeconds={overheadSeconds}
+                  maxPlateSeconds={maxPlateSeconds}
+                  recommended={rp?.kits ?? null}
+                  fastest={rec.fastest?.kits ?? null}
+                  selected={shownKits}
+                  noun={noun}
+                  onSelect={setSelected}
+                />
+              </section>
+            )}
+          </div>
+        </div>
+
+        <EngineNotice hello={hello} info={profiles.lib?.info.engine ?? null} />
+      </div>
+    </>
   );
 }
 

@@ -50,7 +50,8 @@ export function BedView({ bed, parts, layout, caption }: Props) {
       return;
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x0d1b2a);
+    // The theme's --sw-stage: the plate view stays dark in both modes.
+    renderer.setClearColor(0x060e16);
     el.prepend(renderer.domElement);
     const scene = new THREE.Scene();
     scene.add(new THREE.HemisphereLight(0xdde8f5, 0x1b3350, 1.6));

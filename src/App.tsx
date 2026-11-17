@@ -272,6 +272,11 @@ export function App() {
           <span className="pill">preview</span>
           <span className="tag">Lay out the plate and find how many to print at once, with OrcaSlicer's engine in your browser.</span>
           <span className="ver">{__APP_VERSION__}</span>
+          {/* Opens the shared About dialog — see public/about.js, which delegates
+              this attribute from the document, so nothing needs importing here. */}
+          <button type="button" data-stoatworks-about>
+            About
+          </button>
         </div>
       </header>
 
